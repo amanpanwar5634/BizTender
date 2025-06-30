@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
+const userSchema = mongoose.Schema(
   {
     _id: { type: String, required: true }, // if using Clerk or Auth0 IDs
     username: { type: String, required: true },
