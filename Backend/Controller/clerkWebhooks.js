@@ -1,18 +1,21 @@
+import { Webhook } from "svix";
 import User from "../Models/UserModel.js";
-import { Webhook} from "svix";
+
 const clerkWebhooks = async (req, res) => {
   try {
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
-   console.log("whook",whook);
+
     const headers = {
       "svix-id": req.headers["svix-id"],
       "svix-timestamp": req.headers["svix-timestamp"],
       "svix-signature": req.headers["svix-signature"],
     };
 
-  await whook.verify(JSON.stringify(req.body),headers);
+    // ✅ Use raw buffer
+    const payload = req.body;
+    const event = whook.verify(payload, headers);
 
-    const { data, type } = req.body;
+    const { data, type } = event;
 
     const userData = {
       _id: data.id,
@@ -22,20 +25,20 @@ const clerkWebhooks = async (req, res) => {
     };
 
     switch (type) {
-      case "user.created":{
+      case "user.created":
         await User.create(userData);
-        break;}
-      case "user.updated":{
+        break;
+      case "user.updated":
         await User.findByIdAndUpdate(data.id, userData);
-        break;}
-      case "user.deleted":{
+        break;
+      case "user.deleted":
         await User.findByIdAndDelete(data.id);
-        break;}
+        break;
     }
 
     res.json({ success: true, message: "Webhook received" });
   } catch (error) {
-    console.log("Webhook error:", error.message);
+    console.error("Webhook error:", error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 };
