@@ -16,13 +16,15 @@ const clerkWebhooks = async (req, res) => {
     const event = whook.verify(payload, headers);
 
     const { data, type } = event;
+console.log("DATA PAYLOAD:", JSON.stringify(data, null, 2));
 
-    const userData = {
-      _id: data.id,
-      email: data.email_addresses[0].email_address,
-      username: data.first_name + " " + data.last_name,
-      image: data.image_url,
-    };
+const userData = {
+  _id: data.id,
+  email: data.email_addresses?.[0]?.email_address || null,
+  username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+  image: data.image_url || null,
+};
+
 
     switch (type) {
       case "user.created":
