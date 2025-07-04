@@ -27,12 +27,26 @@ const userData = {
 
 
     switch (type) {
-      case "user.created":
+      case "user.created":{
+        const userData = {
+  _id: data.id,
+  email: data.email_addresses?.[0]?.email_address || null,
+  username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+  image: data.image_url || null,
+};
+
         await User.create(userData);
-        break;
-      case "user.updated":
+        break;}
+      case "user.updated":{
+        const userData = {
+  _id: data.id,
+  email: data.email_addresses?.[0]?.email_address || null,
+  username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+  image: data.image_url || null,
+};
+
         await User.findByIdAndUpdate(data.id, userData);
-        break;
+        break;}
       case "user.deleted":
         await User.findByIdAndDelete(data.id);
         break;
