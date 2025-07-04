@@ -8,7 +8,7 @@ const userSchema = mongoose.Schema(
     image: { type: String, required: true },
     role: { type: String, enum: ["user", "companyOwner"],default: "user" },
     industry: { type: String }, // optional: industry for suppliers
-    recentSearchedTenders: [{ type: String }], // tender IDs or keywords
+    recentSearchedIndustries: [{ type: String }],  
   },
   { timestamps: true }
 );

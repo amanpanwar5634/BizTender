@@ -1,11 +1,35 @@
-import React from "react";
-import { dashboardDummyData } from "../../assets/assets";
+import React, { useEffect, useState } from "react";
+import { useAppContext } from "../context/context";
 import { motion } from "framer-motion";
 import CountUp from "react-countup";
 
-export default function Dashboard() {
-  const { totalTenders, totalCompanies, totalApplications, totalBudget, applications } =
-    dashboardDummyData;
+export default function CompanyDashboard() {
+  const { axios, getToken, user, toast } = useAppContext();
+  const [dashboardData, setDashboardData] = useState({
+    applications: [],
+    totalApplications: 0,
+    totalProposalAmount: 0,
+  });
+
+  const fetchData = async () => {
+    try {
+      const { data } = await axios.get("/api/applications/company", {
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+      if (data.success) {
+        setDashboardData(data.dashboardData);
+      } else {
+        toast.error(data.message || "Failed to fetch dashboard data.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "Failed to fetch dashboard data.");
+    }
+  };
+
+  useEffect(() => {
+    if (user) fetchData();
+  }, [user]);
 
   return (
     <motion.div
@@ -21,70 +45,52 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        Tender Dashboard Overview
+        Company Dashboard Overview
       </motion.h1>
 
       {/* Stat Cards */}
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6"
         initial="hidden"
         animate="visible"
         variants={{ visible: { transition: { staggerChildren: 0.2 } } }}
       >
-        {/* Tenders */}
-        <motion.div
-          className="bg-white shadow-xl hover:shadow-2xl p-6 rounded-xl border-l-4 border-blue-400"
-          variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
-        >
-          <p className="text-sm text-gray-500 mb-1">Total Tenders</p>
-          <h2 className="text-3xl font-bold text-blue-600">
-            <CountUp end={totalTenders} duration={1.5} />
-          </h2>
-        </motion.div>
-
-        {/* Companies */}
-        <motion.div
-          className="bg-white shadow-xl hover:shadow-2xl p-6 rounded-xl border-l-4 border-green-400"
-          variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
-        >
-          <p className="text-sm text-gray-500 mb-1">Total Companies</p>
-          <h2 className="text-3xl font-bold text-green-600">
-            <CountUp end={totalCompanies} duration={1.5} />
-          </h2>
-        </motion.div>
-
-        {/* Applications */}
+        {/* Total Applications */}
         <motion.div
           className="bg-white shadow-xl hover:shadow-2xl p-6 rounded-xl border-l-4 border-purple-400"
           variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
         >
           <p className="text-sm text-gray-500 mb-1">Total Applications</p>
           <h2 className="text-3xl font-bold text-purple-600">
-            <CountUp end={totalApplications} duration={1.5} />
+            <CountUp end={dashboardData.totalApplications} duration={1.5} />
           </h2>
         </motion.div>
 
-        {/* Budget */}
+        {/* Total Proposal Amount */}
         <motion.div
           className="bg-white shadow-xl hover:shadow-2xl p-6 rounded-xl border-l-4 border-yellow-400"
           variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
         >
-          <p className="text-sm text-gray-500 mb-1">Total Budget</p>
+          <p className="text-sm text-gray-500 mb-1">Total Proposal Amount</p>
           <h2 className="text-3xl font-bold text-yellow-600">
-            ₹<CountUp end={totalBudget} duration={1.5} separator="," />
+            ₹<CountUp end={dashboardData.totalProposalAmount} duration={1.5} separator="," />
           </h2>
         </motion.div>
       </motion.div>
 
-      {/* Applications Table */}
+      {/* Applications Section */}
       <motion.div
         className="bg-white rounded-xl shadow-lg p-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <h2 className="text-xl font-semibold text-blue-800 mb-4">Recent Applications</h2>
-        <div className="overflow-x-auto">
+        <h2 className="text-xl font-semibold text-blue-800 mb-4">
+          Recent Applications
+        </h2>
+
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full bg-white text-sm text-gray-700 rounded-md">
             <thead className="bg-blue-100 text-blue-800 font-semibold">
               <tr>
@@ -95,8 +101,8 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {applications.length > 0 ? (
-                applications.map((app, index) => (
+              {dashboardData.applications.length > 0 ? (
+                dashboardData.applications.map((app, index) => (
                   <motion.tr
                     key={index}
                     className="border-t hover:bg-blue-50 transition duration-200"
@@ -104,9 +110,11 @@ export default function Dashboard() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <td className="px-4 py-3">{app.tender.title}</td>
-                    <td className="px-4 py-3">{app.company.name}</td>
-                    <td className="px-4 py-3">₹{app.proposalAmount.toLocaleString()}</td>
+                    <td className="px-4 py-3">{app.tender?.title || "-"}</td>
+                    <td className="px-4 py-3">{app.company?.name || "-"}</td>
+                    <td className="px-4 py-3">
+                      ₹{app.proposalAmount?.toLocaleString() || 0}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -131,6 +139,54 @@ export default function Dashboard() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden space-y-4">
+          {dashboardData.applications.length > 0 ? (
+            dashboardData.applications.map((app, index) => (
+              <motion.div
+                key={index}
+                className="border rounded-lg p-4 bg-white shadow-sm"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <div className="mb-2">
+                  <p className="text-xs text-gray-500">Tender</p>
+                  <p className="text-sm font-medium text-gray-800">{app.tender?.title || "-"}</p>
+                </div>
+                <div className="mb-2">
+                  <p className="text-xs text-gray-500">Company</p>
+                  <p className="text-sm font-medium text-gray-800">{app.company?.name || "-"}</p>
+                </div>
+                <div className="mb-2">
+                  <p className="text-xs text-gray-500">Proposal Amount</p>
+                  <p className="text-sm font-medium text-gray-800">
+                    ₹{app.proposalAmount?.toLocaleString() || 0}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Status</p>
+                  <span
+                    className={`inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium ${
+                      app.status === "pending"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : app.status === "approved"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {app.status}
+                  </span>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <div className="text-center py-6 text-gray-400">
+              No applications found.
+            </div>
+          )}
         </div>
       </motion.div>
     </motion.div>

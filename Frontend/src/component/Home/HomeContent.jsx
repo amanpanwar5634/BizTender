@@ -1,137 +1,132 @@
- 
-
 import React, { useState } from "react";
+import { useAppContext } from "../context/context";
 import { motion } from "framer-motion";
+import { FaSearch, FaIndustry } from "react-icons/fa";
+
 export default function HomeContent() {
-//   const { navigate } = useAppContext();
-
-  const [budgetMin, setBudgetMin] = useState("");
-  const [budgetMax, setBudgetMax] = useState("");
+  const { navigate, getToken, axios, setSearchedIndustries, toast,searchedIndustries } = useAppContext();
   const [industry, setIndustry] = useState("");
+  const [keyword, setKeyword] = useState("");
 
-  const onSearch = (e) => {
+  const onSearch = async (e) => {
     e.preventDefault();
-  // Example: route to /tenders page with query params or call your API
-    console.log({
-      budgetMin,
-      budgetMax,
-      industry,
-    });
+    navigate(`/tenders?industry=${industry}&keyword=${keyword}`);
+
+    try {
+   await axios.post( "/api/user/store-recent-search",{ recentSearchedIndustry: industry },
+    { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
+      setSearchedIndustries((prev) => {
+        const updated = [...prev, industry];
+        if (updated.length > 5) updated.shift();
+        return updated;
+      });
+    } catch (err) {
+      console.log("Error storing recent search:", err.message);
+      toast?.error("Failed to store recent search");
+    }
   };
 
   return (
-    <div
-      className="hero min-h-screen sm:h-[90vh] bg-cover bg-center"
-      style={{
-        backgroundImage:
-          "url(https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1350&q=80)",
-      }}
-    >
-      <div className="hero-overlay bg-black bg-opacity-60 flex items-center h-full px-4 sm:px-6 md:px-20">
-        <div className="mt-16 md:mt-4 flex flex-col md:flex-row justify-between items-center w-full max-w-screen-2xl mx-auto gap-6 sm:gap-10">
-          
-          {/* Left Content */}
-          <motion.div
-            className="text-white max-w-xl text-center md:text-left"
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.7 }}
-          >
-            <motion.div
-              className="inline-block bg-yellow-400 text-black font-semibold px-3 py-1 rounded-full mb-3 text-xs sm:text-sm shadow-md"
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              📑 Find & Win New B2B Opportunities
-            </motion.div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-3 leading-snug drop-shadow">
-              Discover & Apply for Tenders on BizTender
-            </h1>
-            <p className="text-sm sm:text-base font-light mb-4">
-              Search tenders by industry and budget range. Grow your business by connecting with verified opportunities.
-            </p>
-            <motion.a
-              href="/register"
-              whileHover={{ scale: 1.05 }}
-              className="inline-block bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-5 rounded-lg transition duration-300 shadow-lg text-sm sm:text-base"
-            >
-              Register Company
-            </motion.a>
-          </motion.div>
+    <section className="min-h-screen flex flex-col items-center justify-center px-4 py-16 bg-gradient-to-br from-emerald-50 to-blue-50">
+      {/* Headline */}
+      <motion.div
+        className="text-center max-w-3xl mb-12"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+      >
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 mb-4">
+          Discover & Win Verified{" "}
+          <span className="text-emerald-600">Tenders</span>
+        </h1>
+        <p className="text-gray-700 text-base sm:text-lg">
+          Search by industry and keywords. Expand your business with trusted B2B opportunities.
+        </p>
+      </motion.div>
 
-          {/* Find Tenders Form */}
-          <motion.div
-            className="bg-white bg-opacity-90 backdrop-blur-lg p-4 sm:p-6 rounded-lg shadow-2xl w-full max-w-md sm:max-w-sm"
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-          >
-            <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
-              Find Tenders
-            </h2>
-            <form className="space-y-3 sm:space-y-4" onSubmit={onSearch}>
-              {/* Budget Min */}
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700">
-                  Budget Min ($)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="Minimum Budget"
-                  value={budgetMin}
-                  onChange={(e) => setBudgetMin(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-                />
-              </div>
-
-              {/* Budget Max */}
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700">
-                  Budget Max ($)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="Maximum Budget"
-                  value={budgetMax}
-                  onChange={(e) => setBudgetMax(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-                />
-              </div>
-
-              {/* Industry */}
-              <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700">
-                  Industry
-                </label>
-                <select
-                  value={industry}
-                  onChange={(e) => setIndustry(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-                >
-                  <option value="">All Industries</option>
-                  <option value="Construction">Construction</option>
-                  <option value="IT Services">IT Services</option>
-                  <option value="Manufacturing">Manufacturing</option>
-                  <option value="Logistics">Logistics</option>
-                  <option value="Healthcare">Healthcare</option>
-                </select>
-              </div>
-
-              <motion.button
-                type="submit"
-                whileTap={{ scale: 0.97 }}
-                whileHover={{ scale: 1.02 }}
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-4 text-sm sm:text-base rounded-lg transition duration-300"
+      {/* Search Card */}
+      <motion.div
+        className="w-full max-w-xl bg-white/90 backdrop-blur-md border border-gray-200 shadow-2xl rounded-3xl p-8"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.2 }}
+      >
+        <h2 className="text-2xl font-bold mb-6 text-emerald-700 text-center">
+          Find Tenders by Industry & Keyword
+        </h2>
+        <form onSubmit={onSearch} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Select Industry
+            </label>
+            <div className="relative">
+              <FaIndustry className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+              <select
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:outline-none"
               >
-                Search Tenders
-              </motion.button>
-            </form>
+                <option value="">All Industries</option>
+                <option value="Construction">Construction</option>
+                <option value="IT Services">IT Services</option>
+                <option value="Manufacturing">Manufacturing</option>
+                <option value="Logistics">Logistics</option>
+                <option value="Healthcare">Healthcare</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Keywords (optional)
+            </label>
+            <div className="relative">
+              <FaSearch className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="E.g. software, roads, equipment"
+                className="w-full pl-10 pr-4 py-3 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <motion.button
+            type="submit"
+            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.02 }}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition duration-300"
+          >
+            Search Tenders
+          </motion.button>
+        </form>
+
+        {/* Example: animated recent searches */}
+        <div className="mt-6">
+          <h3 className="text-sm font-semibold text-gray-600 mb-2">
+            Recent Searches Industries:
+          </h3>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap gap-2"
+          >
+            {/* Replace with your real `searchedIndustries` */}
+            {searchedIndustries.map((tag, i) => (
+              <button
+                key={i}
+                onClick={() => setIndustry(tag)}
+                className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs hover:bg-emerald-200 transition"
+              >
+                {tag}
+              </button>
+            ))}
           </motion.div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </section>
   );
 }

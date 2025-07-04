@@ -1,0 +1,11 @@
+import express from "express";
+ import { checkEligibilityAPI, createApplication, getCompanyApplications, getUserApplications, ownerApplication, updateApplicationStatus, } from "../Controller/ApplicationController.js";
+import { protect } from "../middlewares/authMiddleware.js";
+const applicationRouter=express.Router();
+applicationRouter.post("/check-eligibility",checkEligibilityAPI);
+applicationRouter.post("/apply",protect,createApplication);
+applicationRouter.get("/owner-application",protect,ownerApplication);
+applicationRouter.patch("/:id/:action", protect,updateApplicationStatus);
+applicationRouter.get("/user",protect,getUserApplications);
+applicationRouter.get("/company",protect,getCompanyApplications);
+export default applicationRouter;

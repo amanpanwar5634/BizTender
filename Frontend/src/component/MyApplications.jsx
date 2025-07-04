@@ -1,9 +1,40 @@
-import React from "react"; 
-import { applicationsDummyData } from "../assets/assets";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FaCalendarAlt, FaMoneyBillWave, FaBuilding, FaClock, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import toast from "react-hot-toast";
+import { useAppContext } from "./context/context";
+import {
+  FaCalendarAlt,
+  FaMoneyBillWave,
+  FaBuilding,
+  FaClock,
+  FaCheckCircle,
+  FaTimesCircle,
+} from "react-icons/fa";
 
 export default function MyApplications() {
+  const { axios, getToken, user } = useAppContext();
+  const [applications, setApplications] = useState([]);
+
+  const fetchUserApplications = async () => {
+    try {
+      const { data } = await axios.get("/api/applications/user", {
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+      if (data.success) {
+        console.log("data.applications ->", data.applications);
+        setApplications(data.applications);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
+  useEffect(() => {
+    if (user) fetchUserApplications();
+  }, [user]);
+
   const formatDate = (dateStr) =>
     new Date(dateStr).toLocaleDateString("en-IN", {
       day: "2-digit",
@@ -27,7 +58,8 @@ export default function MyApplications() {
         My Applications
       </motion.h1>
 
-      {applicationsDummyData.map((app, index) => (
+      {/* ✅ Applications List */}
+      {applications.map((app, index) => (
         <motion.div
           key={app._id}
           className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white rounded-xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow duration-300 border-l-4 border-blue-400"

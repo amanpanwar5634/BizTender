@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAppContext } from "./context/context";
 
 const BookIcon = () => (
   <svg
@@ -24,9 +25,8 @@ const BookIcon = () => (
 export default function Navbar() {
   const [sticky, setSticky] = useState(false);
   const { openSignIn } = useClerk();
-  const { user } = useUser();
   const location = useLocation();
-  const navigate = useNavigate();
+  const {user,navigate,isOwner,setIsOwner,showCompanyReg,setShowCompanyReg}=useAppContext();
 
   useEffect(() => {
     const handleScroll = () => setSticky(window.scrollY > 0);
@@ -37,7 +37,7 @@ export default function Navbar() {
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Tenders", href: "/tenders" },
-    { label: "Companies", href: "/companies" },
+    { label: "Company", href: "/company-profile" },
     // Removed "About"
   ];
 
@@ -82,19 +82,19 @@ export default function Navbar() {
                   </a>
                 </li>
               ))}
-              {user && (
-                <li>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate("/dashboard");
-                    }}
-                    className="hover:text-yellow-500"
-                  >
-                    Dashboard
-                  </a>
-                </li>
+               {user && (
+                isOwner ? (
+                  <li><a href="/owner" className="hover:text-yellow-500">Dashboard</a></li>
+                ) : (
+                  <li>
+                    <button
+                      className="btn btn-sm bg-yellow-400 hover:bg-yellow-500 text-black transition"
+                    onClick={() => setShowCompanyReg(true)}
+                    >
+                      Add Your Company
+                    </button>
+                  </li>
+                )
               )}
             </ul>
           </div>
@@ -134,25 +134,32 @@ export default function Navbar() {
                 </a>
               </motion.li>
             ))}
+{user && (
+              isOwner ? (
+                <motion.li whileHover={{ scale: 1.05 }}>
+                  <a href="/owner" className="relative group">
+                    Dashboard
+                    <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
+                  </a>
+                </motion.li>
+              ) : (
+                <motion.li whileHover={{ scale: 1.05 }}>
+                  <a
+  href="#"
+  onClick={(e) => {
+    e.preventDefault(); // Prevent the default link behavior
+    setShowCompanyReg(true);
+    document.getElementById("company_modal").showModal();
+  }}
+  className="hover:text-yellow-500"
+>
+  Add Your Company
+</a>
 
-            {user && (
-              <motion.li
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate("/owner");
-                  }}
-                  className="relative group"
-                >
-                  Dashboard
-                  <span className="absolute left-0 -bottom-1 h-0.5 w-0 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
-                </a>
-              </motion.li>
+                </motion.li>
+              )
             )}
+
           </ul>
         </motion.div>
 
@@ -167,13 +174,18 @@ export default function Navbar() {
                 },
               }}
             >
-              <UserButton.MenuItems>
-                <UserButton.Action
-                  label="My Applications"
-                  labelIcon={<BookIcon />}
-                  onClick={() => navigate("/my-applications")}
-                />
-              </UserButton.MenuItems>
+    <UserButton.MenuItems>
+  <UserButton.Action
+    label="My Applications"
+    labelIcon={<BookIcon />}
+    onClick={() => navigate("/my-applications")}
+  />
+  <UserButton.Action
+    label="Tender Applications"
+    labelIcon={<BookIcon />} // You can replace this with another icon if you want
+    onClick={() => navigate("/tender-application")}
+  />
+</UserButton.MenuItems>
             </UserButton>
           ) : (
             <motion.button

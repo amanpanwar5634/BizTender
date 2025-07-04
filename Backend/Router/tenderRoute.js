@@ -1,0 +1,10 @@
+import express from "express";
+import upload from "../middlewares/uploadMiddleware.js";
+import { protect } from "../middlewares/authMiddleware.js";
+import { createTender, getOwnerTenders, getTenders ,toggleTenderAvailability} from "../Controller/tenderController.js";
+const tenderRouter=express.Router();
+tenderRouter.post('/',upload.array("documents",2),protect,createTender);
+tenderRouter.get('/',getTenders);
+tenderRouter.get('/owner',protect,getOwnerTenders);
+tenderRouter.post('/toggle-eligibility',protect,toggleTenderAvailability);
+export default tenderRouter;
