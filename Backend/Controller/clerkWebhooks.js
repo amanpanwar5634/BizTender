@@ -12,45 +12,41 @@ const clerkWebhooks = async (req, res) => {
     };
 
     // ✅ Use raw buffer
-    const payload = req.body;
-    const event = whook.verify(payload, headers);
+    const payload = req.body.toString();
+    const evt = whook.verify(payload, headers);
 
-    const { data, type } = event;
-console.log("DATA PAYLOAD:", JSON.stringify(data, null, 2));
+    const { data, type } = evt;
 
-const userData = {
-  _id: data.id,
-  email: data.email_addresses?.[0]?.email_address || null,
-  username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
-  image: data.image_url || null,
-};
-
-
+    const userData = {
+      _id: data.id,
+      email: data.email_addresses[0].email_address,
+      username: data.first_name + " " + data.last_name,
+      image: data.image_url,
+    };
     switch (type) {
       case "user.created":{
-        const userData = {
-  _id: data.id,
-  email: data.email_addresses?.[0]?.email_address || null,
-  username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
-  image: data.image_url || null,
-};
-
+         const userData = {
+      _id: data.id,
+      email: data.email_addresses[0].email_address,
+      username: data.first_name + " " + data.last_name,
+      image: data.image_url,
+    };
         await User.create(userData);
         break;}
       case "user.updated":{
-        const userData = {
-  _id: data.id,
-  email: data.email_addresses?.[0]?.email_address || null,
-  username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
-  image: data.image_url || null,
-};
-
+         const userData = {
+      _id: data.id,
+      email: data.email_addresses[0].email_address,
+      username: data.first_name + " " + data.last_name,
+      image: data.image_url,
+    };
         await User.findByIdAndUpdate(data.id, userData);
         break;}
-      case "user.deleted":
+      case "user.deleted":{
         await User.findByIdAndDelete(data.id);
-        break;
+        break;}
     }
+
 
     res.json({ success: true, message: "Webhook received" });
   } catch (error) {
