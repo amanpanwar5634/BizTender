@@ -2,7 +2,7 @@ import React from "react";
 import { assets } from "../../assets/assets";
 import { NavLink } from "react-router-dom";
 
-export default function SidebarMenu({ onLinkClick = () => {} }) {
+export default function SideBarMenu({ onLinkClick = () => {} }) {
   const sideBarLinks = [
     { name: "Dashboard", path: "/owner", icon: assets.dashboardIcon },
     { name: "Add Tender", path: "/owner/add-tender", icon: assets.addIcon },
