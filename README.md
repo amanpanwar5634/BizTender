@@ -32,7 +32,6 @@ Manage tenders, companies, applications, and documents in a single, user-friendl
 Fully responsive design built with **React**, **Tailwind CSS**, and **DaisyUI** for a clean, intuitive experience on all devices.
 
 ---
-
 ## ⚙️ **Tech Stack**
 
 | Layer            | Tools & Libraries                                |
