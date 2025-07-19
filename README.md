@@ -29,7 +29,7 @@ Built-in search bar and dynamic filters make finding tenders quick and simple.
 Manage tenders, companies, applications, and documents in a single, user-friendly dashboard.
 
 ✅ **Modern UI:**  
-Fully responsive design built with **React**, **Tailwind CSS**, and **DaisyUI** for a clean, intuitive experience on all devices.
+Fully responsive design built with **React**, **Tailwind CSS**, and **DaisyUI** for a clean  intuitive experience on all devices.
 
 ---
 ## ⚙️ **Tech Stack**
